@@ -1,0 +1,45 @@
+
+name: Update NASDAQ Market Data
+
+on:
+  schedule:
+    # Every day at 23:30 UTC (08:30 Korea time)
+    - cron: "30 23 * * *"
+
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update-market-data:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install yfinance pandas numpy
+
+      - name: Run NASDAQ data update
+        run: python update_data.py
+
+      - name: Save updated market data
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data.json
+          if ! git diff --cached --quiet; then
+            git commit -m "Update NASDAQ market data"
+            git push
+          else
+            echo "No market data changes"
+          fi
