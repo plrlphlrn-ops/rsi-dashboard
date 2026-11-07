@@ -1,0 +1,188 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RSI Indicator Dashboard</title>
+
+<style>
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background: #111;
+  font-family: Arial, sans-serif;
+  padding: 20px;
+}
+
+.rsi-card {
+  background: #202020;
+  color: white;
+  padding: 25px;
+  border-radius: 15px;
+  max-width: 600px;
+  margin: 40px auto;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 35px;
+  gap: 12px;
+}
+
+.header h3 {
+  font-size: 16px;
+}
+
+#zone {
+  padding: 8px 12px;
+  border-radius: 20px;
+  background: #f97316;
+  font-size: 11px;
+  font-weight: bold;
+  white-space: nowrap;
+}
+
+.bar {
+  display: flex;
+  height: 14px;
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.green { width: 30%; background: #22c55e; }
+.yellow { width: 20%; background: #eab308; }
+.orange { width: 20%; background: #f97316; }
+.red { width: 30%; background: #ef4444; }
+
+input[type="range"] {
+  width: 100%;
+  margin-top: 15px;
+  accent-color: white;
+  cursor: pointer;
+}
+
+.numbers {
+  display: flex;
+  justify-content: space-between;
+  color: #aaa;
+  font-size: 12px;
+}
+
+.result {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  margin-top: 30px;
+  gap: 12px;
+}
+
+#value {
+  font-size: 45px;
+  font-weight: bold;
+  color: #f97316;
+}
+
+small {
+  color: #aaa;
+}
+
+#description {
+  color: #ccc;
+  font-size: 13px;
+  text-align: right;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="rsi-card">
+
+  <div class="header">
+    <h3>RSI INDICATOR</h3>
+    <span id="zone">ORANGE ZONE</span>
+  </div>
+
+  <div class="bar">
+    <div class="green"></div>
+    <div class="yellow"></div>
+    <div class="orange"></div>
+    <div class="red"></div>
+  </div>
+
+  <input
+    type="range"
+    id="slider"
+    min="0"
+    max="100"
+    value="50"
+    aria-label="RSI value"
+  >
+
+  <div class="numbers">
+    <span>0</span>
+    <span>30</span>
+    <span>50</span>
+    <span>70</span>
+    <span>100</span>
+  </div>
+
+  <div class="result">
+    <div>
+      <small>CURRENT RSI</small>
+      <div id="value">50</div>
+    </div>
+    <div id="description">Bullish momentum</div>
+  </div>
+
+</div>
+
+<script>
+const slider = document.getElementById("slider");
+const value = document.getElementById("value");
+const zone = document.getElementById("zone");
+const description = document.getElementById("description");
+
+function updateRSI() {
+  const n = Number(slider.value);
+
+  value.textContent = n;
+
+  let color, name, desc;
+
+  if (n < 30) {
+    color = "#22c55e";
+    name = "GREEN ZONE";
+    desc = "Oversold";
+  } else if (n < 50) {
+    color = "#eab308";
+    name = "YELLOW ZONE";
+    desc = "Weak momentum";
+  } else if (n < 70) {
+    color = "#f97316";
+    name = "ORANGE ZONE";
+    desc = "Bullish momentum";
+  } else {
+    color = "#ef4444";
+    name = "RED ZONE";
+    desc = "Overbought";
+  }
+
+  value.style.color = color;
+  zone.style.background = color;
+  zone.textContent = name;
+  description.textContent = desc;
+}
+
+slider.addEventListener("input", updateRSI);
+updateRSI();
+</script>
+
+</body>
+</html>
