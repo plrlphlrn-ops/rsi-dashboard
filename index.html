@@ -207,8 +207,50 @@ function updateRSI() {
   description.textContent = desc;
 }
 
+
 slider.addEventListener("input", updateRSI);
-updateRSI();
+
+// Load latest market data
+async function loadMarketData() {
+  try {
+    const response = await fetch(
+      "./data.json?t=" + Date.now(),
+      { cache: "no-store" }
+    );
+
+    if (!response.ok) {
+      throw new Error("Failed to load market data");
+    }
+
+    const data = await response.json();
+
+    // Apply latest actual RSI
+    slider.value = data.RSI_14;
+    updateRSI();
+
+    // Update market indicators
+    document.getElementById("nasdaq").textContent =
+      data.NASDAQ.toLocaleString();
+
+    document.getElementById("vxn").textContent =
+      data.VXN.toFixed(2);
+
+    document.getElementById("fear-greed").textContent =
+      data.Fear_Greed.toFixed(2);
+
+    document.getElementById("pbr").textContent =
+      data.PBR.toFixed(3);
+
+    document.getElementById("market-date").textContent =
+      data.date;
+
+  } catch (error) {
+    console.error("Market data loading error:", error);
+  }
+}
+
+loadMarketData();
+
 
 async function loadMarketData() {
   try {
