@@ -3,7 +3,6 @@ name: Update NASDAQ Market Data
 
 on:
   schedule:
-    # Every day at 23:30 UTC (08:30 Korea time)
     - cron: "30 23 * * *"
 
   workflow_dispatch:
@@ -13,14 +12,14 @@ permissions:
 
 jobs:
   update-market-data:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.12"
 
