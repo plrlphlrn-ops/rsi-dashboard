@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -36,6 +35,7 @@ body {
 
 .header h3 {
   font-size: 16px;
+  margin: 0;
 }
 
 #zone {
@@ -97,6 +97,22 @@ small {
   text-align: right;
 }
 
+/* 전달해주신 market-data 디자인 스타일링 */
+.market-data {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 25px;
+  padding-top: 15px;
+  border-top: 1px solid #333;
+  color: #aaa;
+  font-size: 12px;
+}
+
+.market-data span {
+  color: #fff;
+  font-weight: bold;
+}
 </style>
 </head>
 
@@ -141,6 +157,17 @@ small {
     <div id="description">Bullish momentum</div>
   </div>
 
+  <!-- 전달해주신 market-data 구역 추가 -->
+  <div class="market-data">
+    <div>VXN: <span id="vxn">--</span></div>
+    <div>Fear & Greed:
+      <span id="fear-greed">--</span>
+    </div>
+    <div>Last Updated:
+      <span id="market-date">--</span>
+    </div>
+  </div>
+
 </div>
 
 <script>
@@ -182,6 +209,39 @@ function updateRSI() {
 
 slider.addEventListener("input", updateRSI);
 updateRSI();
+
+async function loadMarketData() {
+  try {
+    const response = await fetch(
+      "./data.json?t=" + Date.now()
+    );
+
+    if (!response.ok) {
+      throw new Error("Market data unavailable");
+    }
+
+    const data = await response.json();
+
+    // Actual RSI
+    slider.value = Math.round(data.RSI_14);
+    updateRSI();
+
+    // Additional indicators
+    document.getElementById("vxn").textContent =
+      data.VXN.toFixed(2);
+
+    document.getElementById("fear-greed").textContent =
+      data.Fear_Greed.toFixed(2);
+
+    document.getElementById("market-date").textContent =
+      data.date;
+
+  } catch (error) {
+    console.error("Dashboard update failed:", error);
+  }
+}
+
+loadMarketData();
 </script>
 
 </body>
