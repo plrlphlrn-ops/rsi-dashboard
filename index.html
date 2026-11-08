@@ -97,16 +97,26 @@ small {
   text-align: right;
 }
 
-/* 전달해주신 market-data 디자인 스타일링 */
+/* Market Indicators 스타일링 */
 .market-data {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
   margin-top: 25px;
   padding-top: 15px;
   border-top: 1px solid #333;
   color: #aaa;
   font-size: 12px;
+}
+
+.market-data h3 {
+  font-size: 13px;
+  color: #fff;
+  margin-bottom: 12px;
+  letter-spacing: 0.5px;
+}
+
+.market-data p {
+  display: flex;
+  justify-content: space-between;
+  margin: 6px 0;
 }
 
 .market-data span {
@@ -157,15 +167,19 @@ small {
     <div id="description">Bullish momentum</div>
   </div>
 
-  <!-- 전달해주신 market-data 구역 추가 -->
+  <!-- 요청하신 마켓 지표 구역 추가 -->
   <div class="market-data">
-    <div>VXN: <span id="vxn">--</span></div>
-    <div>Fear & Greed:
+    <h3>MARKET INDICATORS</h3>
+
+    <p>NASDAQ: <span id="nasdaq">--</span></p>
+    <p>VXN: <span id="vxn">--</span></p>
+    <p>Fear & Greed:
       <span id="fear-greed">--</span>
-    </div>
-    <div>Last Updated:
+    </p>
+    <p>PBR: <span id="pbr">--</span></p>
+    <p>Market Date:
       <span id="market-date">--</span>
-    </div>
+    </p>
   </div>
 
 </div>
@@ -207,10 +221,10 @@ function updateRSI() {
   description.textContent = desc;
 }
 
-
 slider.addEventListener("input", updateRSI);
+updateRSI();
 
-// Load latest market data
+// Load latest market data (모든 지표 필드 반영 및 중복 제거 완료)
 async function loadMarketData() {
   try {
     const response = await fetch(
@@ -224,8 +238,8 @@ async function loadMarketData() {
 
     const data = await response.json();
 
-    // Apply latest actual RSI
-    slider.value = data.RSI_14;
+    // Actual RSI
+    slider.value = Math.round(data.RSI_14);
     updateRSI();
 
     // Update market indicators
@@ -246,40 +260,6 @@ async function loadMarketData() {
 
   } catch (error) {
     console.error("Market data loading error:", error);
-  }
-}
-
-loadMarketData();
-
-
-async function loadMarketData() {
-  try {
-    const response = await fetch(
-      "./data.json?t=" + Date.now()
-    );
-
-    if (!response.ok) {
-      throw new Error("Market data unavailable");
-    }
-
-    const data = await response.json();
-
-    // Actual RSI
-    slider.value = Math.round(data.RSI_14);
-    updateRSI();
-
-    // Additional indicators
-    document.getElementById("vxn").textContent =
-      data.VXN.toFixed(2);
-
-    document.getElementById("fear-greed").textContent =
-      data.Fear_Greed.toFixed(2);
-
-    document.getElementById("market-date").textContent =
-      data.date;
-
-  } catch (error) {
-    console.error("Dashboard update failed:", error);
   }
 }
 
