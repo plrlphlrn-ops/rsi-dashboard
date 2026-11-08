@@ -3,7 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>RSI Indicator Dashboard</title>
+<title>Market Indicators & 30Y Macro Dashboard</title>
+<!-- Plotly.js -->
+<script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
 
 <style>
 * {
@@ -12,254 +14,487 @@
 
 body {
   background: #111;
-  font-family: Arial, sans-serif;
+  color: #fff;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   padding: 20px;
-}
-
-.rsi-card {
-  background: #202020;
-  color: white;
-  padding: 25px;
-  border-radius: 15px;
-  max-width: 600px;
-  margin: 40px auto;
-}
-
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 35px;
-  gap: 12px;
-}
-
-.header h3 {
-  font-size: 16px;
   margin: 0;
 }
 
-#zone {
-  padding: 8px 12px;
+.dashboard-container {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.header-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+  border-bottom: 1px solid #333;
+  padding-bottom: 15px;
+}
+
+.header-title h2 {
+  margin: 0;
+  font-size: 20px;
+  letter-spacing: 0.5px;
+}
+
+.market-date-badge {
+  background: #222;
+  border: 1px solid #444;
+  padding: 6px 14px;
   border-radius: 20px;
-  background: #f97316;
-  font-size: 11px;
+  font-size: 12px;
+  color: #aaa;
+}
+
+.market-date-badge span {
+  color: #fff;
+  font-weight: bold;
+}
+
+/* Indicator Grid */
+.indicator-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+.card {
+  background: #1e1e1e;
+  padding: 20px;
+  border-radius: 12px;
+  border: 1px solid #2a2a2a;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.card-title {
+  font-size: 13px;
+  font-weight: bold;
+  color: #aaa;
+  letter-spacing: 0.5px;
+}
+
+.zone-badge {
+  padding: 5px 10px;
+  border-radius: 12px;
+  font-size: 10px;
   font-weight: bold;
   white-space: nowrap;
 }
 
 .bar {
   display: flex;
-  height: 14px;
-  border-radius: 20px;
+  height: 10px;
+  border-radius: 10px;
   overflow: hidden;
+  margin-bottom: 8px;
 }
 
-.green { width: 30%; background: #22c55e; }
+.green  { width: 30%; background: #22c55e; }
 .yellow { width: 20%; background: #eab308; }
 .orange { width: 20%; background: #f97316; }
-.red { width: 30%; background: #ef4444; }
+.red    { width: 30%; background: #ef4444; }
 
 input[type="range"] {
   width: 100%;
-  margin-top: 15px;
-  accent-color: white;
+  accent-color: #ffffff;
   cursor: pointer;
+  margin: 8px 0;
 }
 
-.numbers {
+.ticks {
   display: flex;
   justify-content: space-between;
-  color: #aaa;
-  font-size: 12px;
+  color: #666;
+  font-size: 10px;
+  margin-bottom: 15px;
 }
 
-.result {
+.card-result {
   display: flex;
   justify-content: space-between;
-  align-items: end;
-  margin-top: 30px;
-  gap: 12px;
+  align-items: flex-end;
 }
 
-#value {
-  font-size: 45px;
+.current-value {
+  font-size: 36px;
   font-weight: bold;
-  color: #f97316;
+  line-height: 1;
 }
 
-small {
-  color: #aaa;
-}
-
-#description {
+.description {
+  font-size: 12px;
   color: #ccc;
-  font-size: 13px;
   text-align: right;
 }
 
-/* Market Indicators 스타일링 */
-.market-data {
-  margin-top: 25px;
-  padding-top: 15px;
-  border-top: 1px solid #333;
-  color: #aaa;
-  font-size: 12px;
+/* Plotly Chart Card */
+.chart-card {
+  background: #1e1e1e;
+  border-radius: 12px;
+  border: 1px solid #2a2a2a;
+  padding: 20px;
 }
 
-.market-data h3 {
-  font-size: 13px;
-  color: #fff;
-  margin-bottom: 12px;
-  letter-spacing: 0.5px;
-}
-
-.market-data p {
+.chart-header {
   display: flex;
   justify-content: space-between;
-  margin: 6px 0;
+  align-items: center;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
-.market-data span {
-  color: #fff;
+.chart-title {
+  font-size: 15px;
   font-weight: bold;
+  color: #fff;
+}
+
+.controls {
+  display: flex;
+  gap: 15px;
+  font-size: 12px;
+  color: #aaa;
+  align-items: center;
+}
+
+.controls label {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+#plotly-chart {
+  width: 100%;
+  height: 480px;
 }
 </style>
 </head>
 
 <body>
 
-<div class="rsi-card">
-
-  <div class="header">
-    <h3>RSI INDICATOR</h3>
-    <span id="zone">ORANGE ZONE</span>
+<div class="dashboard-container">
+  
+  <div class="header-title">
+    <h2>MARKET DASHBOARD</h2>
+    <div class="market-date-badge">Last Updated: <span id="market-date">--</span></div>
   </div>
 
-  <div class="bar">
-    <div class="green"></div>
-    <div class="yellow"></div>
-    <div class="orange"></div>
-    <div class="red"></div>
-  </div>
-
-  <input
-    type="range"
-    id="slider"
-    min="0"
-    max="100"
-    value="50"
-    aria-label="RSI value"
-  >
-
-  <div class="numbers">
-    <span>0</span>
-    <span>30</span>
-    <span>50</span>
-    <span>70</span>
-    <span>100</span>
-  </div>
-
-  <div class="result">
-    <div>
-      <small>CURRENT RSI</small>
-      <div id="value">50</div>
+  <!-- Indicator Cards Grid -->
+  <div class="indicator-grid">
+    
+    <!-- RSI CARD -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">RSI (14)</span>
+        <span id="rsi-zone" class="zone-badge">ORANGE ZONE</span>
+      </div>
+      <div class="bar">
+        <div class="green"></div>
+        <div class="yellow"></div>
+        <div class="orange"></div>
+        <div class="red"></div>
+      </div>
+      <input type="range" id="rsi-slider" min="0" max="100" value="50" aria-label="RSI Slider">
+      <div class="ticks">
+        <span>0</span><span>30</span><span>50</span><span>70</span><span>100</span>
+      </div>
+      <div class="card-result">
+        <div>
+          <small style="color:#777; font-size:10px;">CURRENT</small>
+          <div id="rsi-value" class="current-value">50</div>
+        </div>
+        <div id="rsi-desc" class="description">Bullish momentum</div>
+      </div>
     </div>
-    <div id="description">Bullish momentum</div>
+
+    <!-- VXN CARD -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">VXN (NASDAQ VOLATILITY)</span>
+        <span id="vxn-zone" class="zone-badge">YELLOW ZONE</span>
+      </div>
+      <div class="bar">
+        <div class="green"></div>
+        <div class="yellow"></div>
+        <div class="orange"></div>
+        <div class="red"></div>
+      </div>
+      <input type="range" id="vxn-slider" min="10" max="50" value="20" aria-label="VXN Slider">
+      <div class="ticks">
+        <span>10</span><span>18</span><span>25</span><span>35</span><span>50</span>
+      </div>
+      <div class="card-result">
+        <div>
+          <small style="color:#777; font-size:10px;">CURRENT</small>
+          <div id="vxn-value" class="current-value">20.00</div>
+        </div>
+        <div id="vxn-desc" class="description">Moderate Volatility</div>
+      </div>
+    </div>
+
+    <!-- FEAR & GREED CARD -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">FEAR & GREED</span>
+        <span id="fg-zone" class="zone-badge">ORANGE ZONE</span>
+      </div>
+      <div class="bar">
+        <div class="red" style="width:25%;"></div>
+        <div class="orange" style="width:20%;"></div>
+        <div class="yellow" style="width:10%;"></div>
+        <div class="green" style="width:45%;"></div>
+      </div>
+      <input type="range" id="fg-slider" min="0" max="100" value="55" aria-label="Fear & Greed Slider">
+      <div class="ticks">
+        <span>0</span><span>25</span><span>45</span><span>55</span><span>100</span>
+      </div>
+      <div class="card-result">
+        <div>
+          <small style="color:#777; font-size:10px;">CURRENT</small>
+          <div id="fg-value" class="current-value">55.00</div>
+        </div>
+        <div id="fg-desc" class="description">Greed</div>
+      </div>
+    </div>
+
   </div>
 
-  <!-- 요청하신 마켓 지표 구역 추가 -->
-  <div class="market-data">
-    <h3>MARKET INDICATORS</h3>
-
-    <p>NASDAQ: <span id="nasdaq">--</span></p>
-    <p>VXN: <span id="vxn">--</span></p>
-    <p>Fear & Greed:
-      <span id="fear-greed">--</span>
-    </p>
-    <p>PBR: <span id="pbr">--</span></p>
-    <p>Market Date:
-      <span id="market-date">--</span>
-    </p>
+  <!-- 30Y Overlapped Plotly Chart Card -->
+  <div class="chart-card">
+    <div class="chart-header">
+      <div class="chart-title">NASDAQ vs PBR (30-Year History)</div>
+      <div class="controls">
+        <span>Y-Axis Scale:</span>
+        <label><input type="radio" name="scale" value="linear" checked onchange="toggleYScale(this.value)"> Linear</label>
+        <label><input type="radio" name="scale" value="log" onchange="toggleYScale(this.value)"> Logarithmic</label>
+      </div>
+    </div>
+    <div id="plotly-chart"></div>
   </div>
 
 </div>
 
 <script>
-const slider = document.getElementById("slider");
-const value = document.getElementById("value");
-const zone = document.getElementById("zone");
-const description = document.getElementById("description");
-
-function updateRSI() {
-  const n = Number(slider.value);
-
-  value.textContent = n;
-
-  let color, name, desc;
-
-  if (n < 30) {
-    color = "#22c55e";
-    name = "GREEN ZONE";
-    desc = "Oversold";
-  } else if (n < 50) {
-    color = "#eab308";
-    name = "YELLOW ZONE";
-    desc = "Weak momentum";
-  } else if (n < 70) {
-    color = "#f97316";
-    name = "ORANGE ZONE";
-    desc = "Bullish momentum";
-  } else {
-    color = "#ef4444";
-    name = "RED ZONE";
-    desc = "Overbought";
-  }
-
-  value.style.color = color;
-  zone.style.background = color;
-  zone.textContent = name;
-  description.textContent = desc;
+// --- INDICATOR UPDATE LOGIC ---
+function updateRSI(val) {
+  const n = Number(val);
+  document.getElementById("rsi-value").textContent = n;
+  let color, zone, desc;
+  if (n < 30) { color = "#22c55e"; zone = "GREEN ZONE"; desc = "Oversold"; }
+  else if (n < 50) { color = "#eab308"; zone = "YELLOW ZONE"; desc = "Weak momentum"; }
+  else if (n < 70) { color = "#f97316"; zone = "ORANGE ZONE"; desc = "Bullish momentum"; }
+  else { color = "#ef4444"; zone = "RED ZONE"; desc = "Overbought"; }
+  
+  document.getElementById("rsi-value").style.color = color;
+  const badge = document.getElementById("rsi-zone");
+  badge.style.background = color;
+  badge.textContent = zone;
+  document.getElementById("rsi-desc").textContent = desc;
 }
 
-slider.addEventListener("input", updateRSI);
-updateRSI();
+function updateVXN(val) {
+  const n = Number(val);
+  document.getElementById("vxn-value").textContent = n.toFixed(2);
+  let color, zone, desc;
+  if (n < 18) { color = "#22c55e"; zone = "GREEN ZONE"; desc = "Low Volatility / Complacency"; }
+  else if (n < 25) { color = "#eab308"; zone = "YELLOW ZONE"; desc = "Moderate Volatility"; }
+  else if (n < 35) { color = "#f97316"; zone = "ORANGE ZONE"; desc = "High Volatility / Stress"; }
+  else { color = "#ef4444"; zone = "RED ZONE"; desc = "Extreme Fear / Crisis"; }
+  
+  document.getElementById("vxn-value").style.color = color;
+  const badge = document.getElementById("vxn-zone");
+  badge.style.background = color;
+  badge.textContent = zone;
+  document.getElementById("vxn-desc").textContent = desc;
+}
 
-// Load latest market data (모든 지표 필드 반영 및 중복 제거 완료)
-async function loadMarketData() {
-  try {
-    const response = await fetch(
-      "./data.json?t=" + Date.now(),
-      { cache: "no-store" }
-    );
+function updateFG(val) {
+  const n = Number(val);
+  document.getElementById("fg-value").textContent = n.toFixed(2);
+  let color, zone, desc;
+  if (n < 25) { color = "#ef4444"; zone = "RED ZONE"; desc = "Extreme Fear"; }
+  else if (n < 45) { color = "#f97316"; zone = "ORANGE ZONE"; desc = "Fear"; }
+  else if (n < 55) { color = "#eab308"; zone = "YELLOW ZONE"; desc = "Neutral"; }
+  else if (n < 75) { color = "#22c55e"; zone = "GREEN ZONE"; desc = "Greed"; }
+  else { color = "#10b981"; zone = "BRIGHT GREEN"; desc = "Extreme Greed"; }
+  
+  document.getElementById("fg-value").style.color = color;
+  const badge = document.getElementById("fg-zone");
+  badge.style.background = color;
+  badge.textContent = zone;
+  document.getElementById("fg-desc").textContent = desc;
+}
 
-    if (!response.ok) {
-      throw new Error("Failed to load market data");
+document.getElementById("rsi-slider").addEventListener("input", e => updateRSI(e.target.value));
+document.getElementById("vxn-slider").addEventListener("input", e => updateVXN(e.target.value));
+document.getElementById("fg-slider").addEventListener("input", e => updateFG(e.target.value));
+
+// --- 30-YEAR SYNTHETIC DATA GENERATION (1996 - 2026) ---
+function generate30YData() {
+  const dates = [];
+  const nasdaq = [];
+  const pbr = [];
+  
+  const startDate = new Date(1996, 0, 1);
+  const totalMonths = 30 * 12; // 360 monthly points
+  
+  let currentNasdaq = 1050;
+  let currentPBR = 3.2;
+
+  for (let i = 0; i <= totalMonths; i++) {
+    const d = new Date(startDate.getFullYear(), startDate.getMonth() + i, 1);
+    const dateStr = d.toISOString().slice(0, 7);
+    dates.push(dateStr);
+
+    const yearStr = d.getFullYear() + (d.getMonth() / 12);
+
+    // Historical trends approximation (Dot-Com Bubble, 08 Crisis, Covid, 2024-2026 Tech Boom)
+    if (yearStr >= 1996 && yearStr < 2000) {
+      currentNasdaq += 65 + (Math.random() * 20 - 5);
+      currentPBR += 0.08 + (Math.random() * 0.02 - 0.01);
+    } else if (yearStr >= 2000 && yearStr < 2003) {
+      currentNasdaq -= 80 + (Math.random() * 20 - 5);
+      currentPBR -= 0.07 + (Math.random() * 0.02 - 0.01);
+    } else if (yearStr >= 2003 && yearStr < 2008) {
+      currentNasdaq += 25 + (Math.random() * 10 - 4);
+      currentPBR += 0.02 + (Math.random() * 0.01 - 0.005);
+    } else if (yearStr >= 2008 && yearStr < 2009) {
+      currentNasdaq -= 90 + (Math.random() * 20 - 5);
+      currentPBR -= 0.08 + (Math.random() * 0.02 - 0.01);
+    } else if (yearStr >= 2009 && yearStr < 2020) {
+      currentNasdaq += 65 + (Math.random() * 15 - 5);
+      currentPBR += 0.03 + (Math.random() * 0.01 - 0.004);
+    } else if (yearStr >= 2020 && yearStr < 2022) {
+      currentNasdaq += 220 + (Math.random() * 40 - 10);
+      currentPBR += 0.08 + (Math.random() * 0.02 - 0.005);
+    } else if (yearStr >= 2022 && yearStr < 2023) {
+      currentNasdaq -= 180 + (Math.random() * 30 - 10);
+      currentPBR -= 0.06 + (Math.random() * 0.02 - 0.005);
+    } else {
+      currentNasdaq += 140 + (Math.random() * 30 - 10);
+      currentPBR += 0.04 + (Math.random() * 0.01 - 0.004);
     }
 
+    currentNasdaq = Math.max(1000, currentNasdaq);
+    currentPBR = Math.max(1.8, Math.min(7.5, currentPBR));
+
+    nasdaq.push(Math.round(currentNasdaq));
+    pbr.push(Number(currentPBR.toFixed(2)));
+  }
+
+  return { dates, nasdaq, pbr };
+}
+
+const marketHistory = generate30YData();
+
+// --- PLOTLY DUAL-AXIS CHART ---
+const trace1 = {
+  x: marketHistory.dates,
+  y: marketHistory.nasdaq,
+  name: 'NASDAQ Composite',
+  type: 'scatter',
+  mode: 'lines',
+  line: { color: '#00f2fe', width: 2 },
+  hoverinfo: 'x+y'
+};
+
+const trace2 = {
+  x: marketHistory.dates,
+  y: marketHistory.pbr,
+  name: 'NASDAQ PBR',
+  type: 'scatter',
+  mode: 'lines',
+  yaxis: 'y2',
+  line: { color: '#fbbf24', width: 2, dash: 'dot' },
+  hoverinfo: 'x+y'
+};
+
+const layout = {
+  paper_bgcolor: 'rgba(0,0,0,0)',
+  plot_bgcolor: 'rgba(0,0,0,0)',
+  margin: { l: 50, r: 50, t: 20, b: 40 },
+  showlegend: true,
+  legend: {
+    x: 0.02,
+    y: 1.15,
+    orientation: 'h',
+    font: { color: '#ccc', size: 12 }
+  },
+  xaxis: {
+    color: '#888',
+    gridcolor: '#222',
+    rangeslider: { visible: true, thickness: 0.08, bgcolor: '#1a1a1a' },
+    rangeselector: {
+      buttons: [
+        { count: 1, label: '1Y', step: 'year', stepmode: 'backward' },
+        { count: 5, label: '5Y', step: 'year', stepmode: 'backward' },
+        { count: 10, label: '10Y', step: 'year', stepmode: 'backward' },
+        { count: 20, label: '20Y', step: 'year', stepmode: 'backward' },
+        { step: 'all', label: '30Y Max' }
+      ],
+      font: { color: '#fff', size: 10 },
+      bgcolor: '#2b2b2b',
+      activecolor: '#00f2fe'
+    }
+  },
+  yaxis: {
+    title: { text: 'NASDAQ Index', font: { color: '#00f2fe', size: 12 } },
+    color: '#00f2fe',
+    gridcolor: '#222',
+    type: 'linear'
+  },
+  yaxis2: {
+    title: { text: 'PBR Ratio', font: { color: '#fbbf24', size: 12 } },
+    color: '#fbbf24',
+    overlaying: 'y',
+    side: 'right',
+    showgrid: false
+  }
+};
+
+const config = { responsive: true, displayModeBar: false };
+Plotly.newPlot('plotly-chart', [trace1, trace2], layout, config);
+
+function toggleYScale(type) {
+  Plotly.relayout('plotly-chart', { 'yaxis.type': type });
+}
+
+// --- FETCH DATA / JSON INTEGRATION ---
+async function loadMarketData() {
+  try {
+    const response = await fetch("./data.json?t=" + Date.now(), { cache: "no-store" });
+    if (!response.ok) throw new Error("Data fetch failed");
     const data = await response.json();
 
-    // Actual RSI
-    slider.value = Math.round(data.RSI_14);
-    updateRSI();
+    document.getElementById("rsi-slider").value = Math.round(data.RSI_14);
+    updateRSI(data.RSI_14);
 
-    // Update market indicators
-    document.getElementById("nasdaq").textContent =
-      data.NASDAQ.toLocaleString();
+    document.getElementById("vxn-slider").value = data.VXN;
+    updateVXN(data.VXN);
 
-    document.getElementById("vxn").textContent =
-      data.VXN.toFixed(2);
+    document.getElementById("fg-slider").value = data.Fear_Greed;
+    updateFG(data.Fear_Greed);
 
-    document.getElementById("fear-greed").textContent =
-      data.Fear_Greed.toFixed(2);
-
-    document.getElementById("pbr").textContent =
-      data.PBR.toFixed(3);
-
-    document.getElementById("market-date").textContent =
-      data.date;
+    document.getElementById("market-date").textContent = data.date;
 
   } catch (error) {
-    console.error("Market data loading error:", error);
+    console.warn("Using default indicator values. Local JSON not reachable:", error.message);
+    document.getElementById("market-date").textContent = "Live Demo";
+    updateRSI(50);
+    updateVXN(20);
+    updateFG(55);
   }
 }
 
