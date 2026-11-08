@@ -3,9 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Market Indicators & 30Y Macro Dashboard</title>
-<!-- Plotly.js -->
-<script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+<title>Market Indicator Dashboard</title>
 
 <style>
 * {
@@ -21,7 +19,7 @@ body {
 }
 
 .dashboard-container {
-  max-width: 900px;
+  max-width: 600px;
   margin: 0 auto;
 }
 
@@ -29,23 +27,23 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 25px;
+  margin-bottom: 20px;
   border-bottom: 1px solid #333;
   padding-bottom: 15px;
 }
 
 .header-title h2 {
   margin: 0;
-  font-size: 20px;
+  font-size: 18px;
   letter-spacing: 0.5px;
 }
 
 .market-date-badge {
   background: #222;
   border: 1px solid #444;
-  padding: 6px 14px;
+  padding: 6px 12px;
   border-radius: 20px;
-  font-size: 12px;
+  font-size: 11px;
   color: #aaa;
 }
 
@@ -54,19 +52,13 @@ body {
   font-weight: bold;
 }
 
-/* Indicator Grid */
-.indicator-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
-  gap: 20px;
-  margin-bottom: 30px;
-}
-
+/* Indicator Grid / Card */
 .card {
   background: #1e1e1e;
   padding: 20px;
   border-radius: 12px;
   border: 1px solid #2a2a2a;
+  margin-bottom: 20px;
 }
 
 .card-header {
@@ -136,49 +128,6 @@ input[type="range"] {
   color: #ccc;
   text-align: right;
 }
-
-/* Plotly Chart Card */
-.chart-card {
-  background: #1e1e1e;
-  border-radius: 12px;
-  border: 1px solid #2a2a2a;
-  padding: 20px;
-}
-
-.chart-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 10px;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-
-.chart-title {
-  font-size: 15px;
-  font-weight: bold;
-  color: #fff;
-}
-
-.controls {
-  display: flex;
-  gap: 15px;
-  font-size: 12px;
-  color: #aaa;
-  align-items: center;
-}
-
-.controls label {
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-}
-
-#plotly-chart {
-  width: 100%;
-  height: 480px;
-}
 </style>
 </head>
 
@@ -187,107 +136,88 @@ input[type="range"] {
 <div class="dashboard-container">
   
   <div class="header-title">
-    <h2>MARKET DASHBOARD</h2>
-    <div class="market-date-badge">Last Updated: <span id="market-date">--</span></div>
+    <h2>MARKET INDICATORS</h2>
+    <div class="market-date-badge">Updated: <span id="market-date">--</span></div>
   </div>
 
-  <!-- Indicator Cards Grid -->
-  <div class="indicator-grid">
-    
-    <!-- RSI CARD -->
-    <div class="card">
-      <div class="card-header">
-        <span class="card-title">RSI (14)</span>
-        <span id="rsi-zone" class="zone-badge">ORANGE ZONE</span>
-      </div>
-      <div class="bar">
-        <div class="green"></div>
-        <div class="yellow"></div>
-        <div class="orange"></div>
-        <div class="red"></div>
-      </div>
-      <input type="range" id="rsi-slider" min="0" max="100" value="50" aria-label="RSI Slider">
-      <div class="ticks">
-        <span>0</span><span>30</span><span>50</span><span>70</span><span>100</span>
-      </div>
-      <div class="card-result">
-        <div>
-          <small style="color:#777; font-size:10px;">CURRENT</small>
-          <div id="rsi-value" class="current-value">50</div>
-        </div>
-        <div id="rsi-desc" class="description">Bullish momentum</div>
-      </div>
+  <!-- RSI CARD -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">RSI (14)</span>
+      <span id="rsi-zone" class="zone-badge">ORANGE ZONE</span>
     </div>
-
-    <!-- VXN CARD -->
-    <div class="card">
-      <div class="card-header">
-        <span class="card-title">VXN (NASDAQ VOLATILITY)</span>
-        <span id="vxn-zone" class="zone-badge">YELLOW ZONE</span>
-      </div>
-      <div class="bar">
-        <div class="green"></div>
-        <div class="yellow"></div>
-        <div class="orange"></div>
-        <div class="red"></div>
-      </div>
-      <input type="range" id="vxn-slider" min="10" max="50" value="20" aria-label="VXN Slider">
-      <div class="ticks">
-        <span>10</span><span>18</span><span>25</span><span>35</span><span>50</span>
-      </div>
-      <div class="card-result">
-        <div>
-          <small style="color:#777; font-size:10px;">CURRENT</small>
-          <div id="vxn-value" class="current-value">20.00</div>
-        </div>
-        <div id="vxn-desc" class="description">Moderate Volatility</div>
-      </div>
+    <div class="bar">
+      <div class="green"></div>
+      <div class="yellow"></div>
+      <div class="orange"></div>
+      <div class="red"></div>
     </div>
-
-    <!-- FEAR & GREED CARD -->
-    <div class="card">
-      <div class="card-header">
-        <span class="card-title">FEAR & GREED</span>
-        <span id="fg-zone" class="zone-badge">ORANGE ZONE</span>
-      </div>
-      <div class="bar">
-        <div class="red" style="width:25%;"></div>
-        <div class="orange" style="width:20%;"></div>
-        <div class="yellow" style="width:10%;"></div>
-        <div class="green" style="width:45%;"></div>
-      </div>
-      <input type="range" id="fg-slider" min="0" max="100" value="55" aria-label="Fear & Greed Slider">
-      <div class="ticks">
-        <span>0</span><span>25</span><span>45</span><span>55</span><span>100</span>
-      </div>
-      <div class="card-result">
-        <div>
-          <small style="color:#777; font-size:10px;">CURRENT</small>
-          <div id="fg-value" class="current-value">55.00</div>
-        </div>
-        <div id="fg-desc" class="description">Greed</div>
-      </div>
+    <input type="range" id="rsi-slider" min="0" max="100" value="50" aria-label="RSI Slider">
+    <div class="ticks">
+      <span>0</span><span>30</span><span>50</span><span>70</span><span>100</span>
     </div>
-
+    <div class="card-result">
+      <div>
+        <small style="color:#777; font-size:10px;">CURRENT</small>
+        <div id="rsi-value" class="current-value">50</div>
+      </div>
+      <div id="rsi-desc" class="description">Bullish momentum</div>
+    </div>
   </div>
 
-  <!-- 30Y Overlapped Plotly Chart Card -->
-  <div class="chart-card">
-    <div class="chart-header">
-      <div class="chart-title">NASDAQ vs PBR (30-Year Real Curve)</div>
-      <div class="controls">
-        <span>Y-Axis Scale:</span>
-        <label><input type="radio" name="scale" value="linear" checked onchange="toggleYScale(this.value)"> Linear</label>
-        <label><input type="radio" name="scale" value="log" onchange="toggleYScale(this.value)"> Logarithmic</label>
-      </div>
+  <!-- VXN CARD -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">VXN (NASDAQ VOLATILITY)</span>
+      <span id="vxn-zone" class="zone-badge">YELLOW ZONE</span>
     </div>
-    <div id="plotly-chart"></div>
+    <div class="bar">
+      <div class="green"></div>
+      <div class="yellow"></div>
+      <div class="orange"></div>
+      <div class="red"></div>
+    </div>
+    <input type="range" id="vxn-slider" min="10" max="50" value="20" aria-label="VXN Slider">
+    <div class="ticks">
+      <span>10</span><span>18</span><span>25</span><span>35</span><span>50</span>
+    </div>
+    <div class="card-result">
+      <div>
+        <small style="color:#777; font-size:10px;">CURRENT</small>
+        <div id="vxn-value" class="current-value">20.00</div>
+      </div>
+      <div id="vxn-desc" class="description">Moderate Volatility</div>
+    </div>
+  </div>
+
+  <!-- FEAR & GREED CARD -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">FEAR & GREED</span>
+      <span id="fg-zone" class="zone-badge">ORANGE ZONE</span>
+    </div>
+    <div class="bar">
+      <div class="red" style="width:25%;"></div>
+      <div class="orange" style="width:20%;"></div>
+      <div class="yellow" style="width:10%;"></div>
+      <div class="green" style="width:45%;"></div>
+    </div>
+    <input type="range" id="fg-slider" min="0" max="100" value="55" aria-label="Fear & Greed Slider">
+    <div class="ticks">
+      <span>0</span><span>25</span><span>45</span><span>55</span><span>100</span>
+    </div>
+    <div class="card-result">
+      <div>
+        <small style="color:#777; font-size:10px;">CURRENT</small>
+        <div id="fg-value" class="current-value">55.00</div>
+      </div>
+      <div id="fg-desc" class="description">Greed</div>
+    </div>
   </div>
 
 </div>
 
 <script>
-// --- INDICATOR UI LOGIC ---
 function updateRSI(val) {
   const n = Number(val);
   document.getElementById("rsi-value").textContent = n;
@@ -308,9 +238,9 @@ function updateVXN(val) {
   const n = Number(val);
   document.getElementById("vxn-value").textContent = n.toFixed(2);
   let color, zone, desc;
-  if (n < 18) { color = "#22c55e"; zone = "GREEN ZONE"; desc = "Low Volatility / Complacency"; }
+  if (n < 18) { color = "#22c55e"; zone = "GREEN ZONE"; desc = "Low Volatility"; }
   else if (n < 25) { color = "#eab308"; zone = "YELLOW ZONE"; desc = "Moderate Volatility"; }
-  else if (n < 35) { color = "#f97316"; zone = "ORANGE ZONE"; desc = "High Volatility / Stress"; }
+  else if (n < 35) { color = "#f97316"; zone = "ORANGE ZONE"; desc = "High Volatility"; }
   else { color = "#ef4444"; zone = "RED ZONE"; desc = "Extreme Fear / Crisis"; }
   
   document.getElementById("vxn-value").style.color = color;
@@ -341,142 +271,6 @@ document.getElementById("rsi-slider").addEventListener("input", e => updateRSI(e
 document.getElementById("vxn-slider").addEventListener("input", e => updateVXN(e.target.value));
 document.getElementById("fg-slider").addEventListener("input", e => updateFG(e.target.value));
 
-// --- 30-YEAR HIGH-RESOLUTION HISTORICAL SIMULATION (1996 - 2026) ---
-// Mirrors the exact price-scaled PBR proxy math: PBR_t = Anchor_PBR * Price_t / Price_anchor
-function generateRealistic30YData() {
-  const dates = [];
-  const nasdaq = [];
-  const pbr = [];
-  
-  const startYear = 1996;
-  const endYear = 2026;
-  const daysPerYear = 250;
-  
-  let val = 1050; // NASDAQ level around Jan 1996
-  const anchorPBR = 7.5; // Current QQQ PBR anchor
-  const targetFinalPrice = 24579.42;
-
-  // Macro regime nodes matching actual historical turning points
-  const milestones = [
-    { year: 1996.0, level: 1050 },
-    { year: 2000.2, level: 5048 },  // Dot-Com Bubble Peak
-    { year: 2002.8, level: 1114 },  // Dot-Com Crash Bottom
-    { year: 2007.8, level: 2859 },  // Pre-GFC Peak
-    { year: 2009.2, level: 1268 },  // GFC Trough
-    { year: 2020.1, level: 9817 },  // Pre-Covid Peak
-    { year: 2020.2, level: 6860 },  // Covid Crash Trough
-    { year: 2021.9, level: 16057 }, // Post-Covid Tech Peak
-    { year: 2022.9, level: 10088 }, // 2022 Fed Rate Hike Trough
-    { year: 2026.8, level: 24579 }  // Current Level
-  ];
-
-  let currentMilestoneIdx = 0;
-
-  for (let y = startYear; y <= endYear; y += 1 / daysPerYear) {
-    const d = new Date(1996, 0, 1);
-    d.setDate(d.getDate() + Math.round((y - startYear) * 365.25));
-    dates.push(d.toISOString().slice(0, 10));
-
-    // Interpolate target trajectory between key macro events
-    while (currentMilestoneIdx < milestones.length - 1 && y > milestones[currentMilestoneIdx + 1].year) {
-      currentMilestoneIdx++;
-    }
-
-    const m1 = milestones[currentMilestoneIdx];
-    const m2 = milestones[Math.min(currentMilestoneIdx + 1, milestones.length - 1)];
-    
-    const progress = (y - m1.year) / (m2.year - m1.year || 1);
-    const targetVal = m1.level + progress * (m2.level - m1.level);
-
-    // Add daily Brownian noise/volatility
-    const dailyReturn = (targetVal - val) / val * 0.15 + (Math.random() - 0.49) * 0.012;
-    val = val * (1 + dailyReturn);
-    val = Math.max(800, val);
-
-    const calcPbr = anchorPBR * (val / targetFinalPrice);
-
-    nasdaq.push(Number(val.toFixed(2)));
-    pbr.push(Number(calcPbr.toFixed(3)));
-  }
-
-  return { dates, nasdaq, pbr };
-}
-
-const marketHistory = generateRealistic30YData();
-
-// --- PLOTLY DUAL-AXIS CHART ---
-const trace1 = {
-  x: marketHistory.dates,
-  y: marketHistory.nasdaq,
-  name: 'NASDAQ Composite',
-  type: 'scatter',
-  mode: 'lines',
-  line: { color: '#00f2fe', width: 1.8 },
-  hoverinfo: 'x+y'
-};
-
-const trace2 = {
-  x: marketHistory.dates,
-  y: marketHistory.pbr,
-  name: 'NASDAQ PBR Proxy',
-  type: 'scatter',
-  mode: 'lines',
-  yaxis: 'y2',
-  line: { color: '#fbbf24', width: 1.8, dash: 'dot' },
-  hoverinfo: 'x+y'
-};
-
-const layout = {
-  paper_bgcolor: 'rgba(0,0,0,0)',
-  plot_bgcolor: 'rgba(0,0,0,0)',
-  margin: { l: 50, r: 50, t: 20, b: 40 },
-  showlegend: true,
-  legend: {
-    x: 0.02,
-    y: 1.15,
-    orientation: 'h',
-    font: { color: '#ccc', size: 12 }
-  },
-  xaxis: {
-    color: '#888',
-    gridcolor: '#222',
-    rangeslider: { visible: true, thickness: 0.08, bgcolor: '#1a1a1a' },
-    rangeselector: {
-      buttons: [
-        { count: 1, label: '1Y', step: 'year', stepmode: 'backward' },
-        { count: 5, label: '5Y', step: 'year', stepmode: 'backward' },
-        { count: 10, label: '10Y', step: 'year', stepmode: 'backward' },
-        { count: 20, label: '20Y', step: 'year', stepmode: 'backward' },
-        { step: 'all', label: '30Y Max' }
-      ],
-      font: { color: '#fff', size: 10 },
-      bgcolor: '#2b2b2b',
-      activecolor: '#00f2fe'
-    }
-  },
-  yaxis: {
-    title: { text: 'NASDAQ Index', font: { color: '#00f2fe', size: 12 } },
-    color: '#00f2fe',
-    gridcolor: '#222',
-    type: 'linear'
-  },
-  yaxis2: {
-    title: { text: 'PBR Ratio', font: { color: '#fbbf24', size: 12 } },
-    color: '#fbbf24',
-    overlaying: 'y',
-    side: 'right',
-    showgrid: false
-  }
-};
-
-const config = { responsive: true, displayModeBar: false };
-Plotly.newPlot('plotly-chart', [trace1, trace2], layout, config);
-
-function toggleYScale(type) {
-  Plotly.relayout('plotly-chart', { 'yaxis.type': type });
-}
-
-// --- FETCH LOCAL DATA.JSON IF PRESENT ---
 async function loadMarketData() {
   try {
     const response = await fetch("./data.json?t=" + Date.now(), { cache: "no-store" });
@@ -493,9 +287,8 @@ async function loadMarketData() {
     updateFG(data.Fear_Greed);
 
     document.getElementById("market-date").textContent = data.date;
-
   } catch (error) {
-    document.getElementById("market-date").textContent = "Live Stream";
+    document.getElementById("market-date").textContent = "Offline Mode";
     updateRSI(50);
     updateVXN(20);
     updateFG(55);
